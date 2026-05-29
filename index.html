@@ -2271,7 +2271,6 @@
   .day-btn.active { animation: glowPulse 2.5s ease-in-out infinite; }
 
   .nav-week-fill { animation: navBarGlow 2.5s ease-in-out infinite; }
-  .macro-calc-fab { animation: fabPulse 3s ease-in-out infinite; }
   .done-banner { animation: slideInLeft 0.35s ease both; }
 
   .reset-btn { transition: all 0.2s ease; }
@@ -2402,6 +2401,9 @@
     </button>
     <button class="tab-btn" id="tabComplements" style="color:#f59e0b" onclick="switchTab('complements')">
       <span class="tab-dot" style="background:#f59e0b"></span> Compléments
+    </button>
+    <button class="tab-btn" id="tabMacros" style="color:#22d3ee" onclick="switchTab('macros')">
+      <span class="tab-dot" style="background:#22d3ee"></span> Macros
     </button>
   </div>
 </div>
@@ -3863,6 +3865,111 @@
 </div>
 </div><!-- end tabContentComplements -->
 
+<!-- 🧮 ONGLET CALCULATEUR DE MACROS -->
+<div id="tabContentMacros" style="display:none">
+<div style="max-width:820px;margin:0 auto;padding:36px 16px 100px">
+
+  <div class="section-eyebrow">Calculateur de macros</div>
+
+  <div class="nutrition-intro" style="margin-bottom:24px">
+    Remplis tes données pour obtenir tes apports caloriques et macros journaliers personnalisés. Basé sur la <strong>formule Harris-Benedict révisée</strong>, ajustée selon ton niveau d'activité et ton objectif.
+  </div>
+
+  <div style="max-width:560px">
+
+    <div class="mc-field">
+      <label class="mc-label">Sexe</label>
+      <div class="mc-sex-toggle">
+        <button class="mc-sex-btn active" id="mcSexH" onclick="setSex('H')">♂ Homme</button>
+        <button class="mc-sex-btn" id="mcSexF" onclick="setSex('F')">♀ Femme</button>
+      </div>
+    </div>
+
+    <div class="mc-input-row" style="gap:12px">
+      <div class="mc-field" style="flex:1;margin-bottom:0">
+        <label class="mc-label">Âge</label>
+        <input class="mc-input" id="mcAge" type="number" min="14" max="90" placeholder="25" />
+      </div>
+      <div class="mc-field" style="flex:1;margin-bottom:0">
+        <label class="mc-label">Poids (kg)</label>
+        <input class="mc-input" id="mcWeight" type="number" min="30" max="250" placeholder="75" />
+      </div>
+      <div class="mc-field" style="flex:1;margin-bottom:0">
+        <label class="mc-label">Taille (cm)</label>
+        <input class="mc-input" id="mcHeight" type="number" min="120" max="230" placeholder="175" />
+      </div>
+    </div>
+
+    <hr class="mc-divider"/>
+
+    <div class="mc-field">
+      <label class="mc-label">Niveau d'activité</label>
+      <select class="mc-select" id="mcActivity">
+        <option value="1.2">Sédentaire — bureau, peu de sport</option>
+        <option value="1.375">Légèrement actif — 1–2 séances/sem</option>
+        <option value="1.55" selected>Modérément actif — 3–5 séances/sem</option>
+        <option value="1.725">Très actif — 6–7 séances/sem</option>
+        <option value="1.9">Extrêmement actif — sport + travail physique</option>
+      </select>
+    </div>
+
+    <div class="mc-field">
+      <label class="mc-label">Objectif</label>
+      <select class="mc-select" id="mcGoal">
+        <option value="bulk">💪 Prise de masse (+300 kcal)</option>
+        <option value="maintain">⚖️ Maintenance (0 kcal)</option>
+        <option value="cut_soft">🔥 Sèche douce (–300 kcal)</option>
+        <option value="cut">❄️ Sèche (–500 kcal)</option>
+      </select>
+    </div>
+
+    <hr class="mc-divider"/>
+
+    <button class="mc-calc-btn" onclick="calculateMacros()">Calculer mes macros</button>
+
+    <div class="mc-results" id="mcResults" style="margin-top:16px">
+      <div class="mc-results-title">Tes objectifs quotidiens</div>
+      <div class="mc-results-kcal">
+        <div class="mc-kcal-num" id="mcKcalNum">—</div>
+        <div class="mc-kcal-label">kcal / jour</div>
+        <div class="mc-kcal-sub" id="mcKcalSub"></div>
+      </div>
+      <div class="mc-macros-grid">
+        <div class="mc-macro-pill">
+          <div class="mc-macro-val" id="mcProt" style="color:#f97316">—</div>
+          <div class="mc-macro-unit">g</div>
+          <div class="mc-macro-name">Protéines</div>
+        </div>
+        <div class="mc-macro-pill">
+          <div class="mc-macro-val" id="mcCarbs" style="color:#3b82f6">—</div>
+          <div class="mc-macro-unit">g</div>
+          <div class="mc-macro-name">Glucides</div>
+        </div>
+        <div class="mc-macro-pill">
+          <div class="mc-macro-val" id="mcFat" style="color:#a855f7">—</div>
+          <div class="mc-macro-unit">g</div>
+          <div class="mc-macro-name">Lipides</div>
+        </div>
+      </div>
+      <div class="mc-warn" id="mcWarn"></div>
+    </div>
+
+  </div>
+
+  <!-- CARTES EXPLICATIVES -->
+  <div class="section-eyebrow" style="margin-top:40px">Comment ça marche</div>
+  <div class="tips-grid">
+    <div class="tip-card"><span class="tip-icon">🔬</span><span class="tip-text"><strong>Harris-Benedict (révisé)</strong> — estime ton métabolisme de base à partir de l'âge, du poids, de la taille et du sexe. Multiplié par le facteur d'activité pour obtenir le TDEE.</span></div>
+    <div class="tip-card"><span class="tip-icon">🥩</span><span class="tip-text"><strong>Protéines :</strong> 1,8 g/kg en prise de masse et maintenance, 2,2 g/kg en sèche pour préserver la masse musculaire.</span></div>
+    <div class="tip-card"><span class="tip-icon">🥑</span><span class="tip-text"><strong>Lipides :</strong> fixés à 0,9 g/kg pour soutenir la production hormonale et la santé articulaire. Ne descends pas en dessous.</span></div>
+    <div class="tip-card"><span class="tip-icon">🌾</span><span class="tip-text"><strong>Glucides :</strong> complètent les calories restantes après les protéines et les lipides. Ils alimentent tes séances — n'aie pas peur d'eux.</span></div>
+    <div class="tip-card"><span class="tip-icon">⚠️</span><span class="tip-text">Ce sont des <strong>estimations de départ</strong>. Suis ton poids pendant 2 semaines et ajuste de ±100–200 kcal selon les résultats réels.</span></div>
+    <div class="tip-card"><span class="tip-icon">📏</span><span class="tip-text">Les formules sont les plus précises pour les <strong>morphologies moyennes</strong>. Les sportifs avec beaucoup de muscle devront souvent augmenter les apports.</span></div>
+  </div>
+
+</div>
+</div><!-- end tabContentMacros -->
+
 <footer>
   Programme généré avec soin &nbsp;·&nbsp; Consulte un professionnel de santé avant de commencer
   <br><br>
@@ -3912,102 +4019,6 @@
   </div>
 </div>
 
-<!-- 🧮 FAB CALCULATEUR -->
-<button class="macro-calc-fab" id="macroFab" onclick="openMacroCalc()" title="Calculateur de macros">🧮</button>
-
-<!-- 🧮 MODAL CALCULATEUR DE MACROS -->
-<div id="macroModal" class="macro-modal-overlay" onclick="if(event.target===this)closeMacroCalc()">
-  <div class="macro-modal-box">
-    <div class="macro-modal-header">
-      <div>
-        <div class="macro-modal-title">Calculateur de Macros</div>
-        <div class="macro-modal-sub">Formule Harris-Benedict — Personnalisé pour ton objectif</div>
-      </div>
-      <button class="cgu-modal-close" onclick="closeMacroCalc()">✕</button>
-    </div>
-    <div class="macro-modal-body">
-
-      <div class="mc-field">
-        <label class="mc-label">Sexe</label>
-        <div class="mc-sex-toggle">
-          <button class="mc-sex-btn active" id="mcSexH" onclick="setSex('H')">♂ Homme</button>
-          <button class="mc-sex-btn" id="mcSexF" onclick="setSex('F')">♀ Femme</button>
-        </div>
-      </div>
-
-      <div class="mc-input-row" style="gap:12px">
-        <div class="mc-field" style="flex:1;margin-bottom:0">
-          <label class="mc-label">Âge</label>
-          <input class="mc-input" id="mcAge" type="number" min="14" max="90" placeholder="25" />
-        </div>
-        <div class="mc-field" style="flex:1;margin-bottom:0">
-          <label class="mc-label">Poids (kg)</label>
-          <input class="mc-input" id="mcWeight" type="number" min="30" max="250" placeholder="75" />
-        </div>
-        <div class="mc-field" style="flex:1;margin-bottom:0">
-          <label class="mc-label">Taille (cm)</label>
-          <input class="mc-input" id="mcHeight" type="number" min="120" max="230" placeholder="175" />
-        </div>
-      </div>
-
-      <hr class="mc-divider"/>
-
-      <div class="mc-field">
-        <label class="mc-label">Niveau d'activité</label>
-        <select class="mc-select" id="mcActivity">
-          <option value="1.2">Sédentaire — bureau, peu de sport</option>
-          <option value="1.375">Légèrement actif — 1–2 séances/sem</option>
-          <option value="1.55" selected>Modérément actif — 3–5 séances/sem</option>
-          <option value="1.725">Très actif — 6–7 séances/sem</option>
-          <option value="1.9">Extrêmement actif — sport + travail physique</option>
-        </select>
-      </div>
-
-      <div class="mc-field" style="margin-bottom:0">
-        <label class="mc-label">Objectif</label>
-        <select class="mc-select" id="mcGoal">
-          <option value="bulk">💪 Prise de masse (+300 kcal)</option>
-          <option value="maintain">⚖️ Maintenance (0 kcal)</option>
-          <option value="cut_soft">🔥 Sèche douce (–300 kcal)</option>
-          <option value="cut">❄️ Sèche (–500 kcal)</option>
-        </select>
-      </div>
-
-      <hr class="mc-divider"/>
-
-      <div class="mc-results" id="mcResults">
-        <div class="mc-results-title">Tes objectifs quotidiens</div>
-        <div class="mc-results-kcal">
-          <div class="mc-kcal-num" id="mcKcalNum">—</div>
-          <div class="mc-kcal-label">kcal / jour</div>
-          <div class="mc-kcal-sub" id="mcKcalSub"></div>
-        </div>
-        <div class="mc-macros-grid">
-          <div class="mc-macro-pill">
-            <div class="mc-macro-val" id="mcProt" style="color:#f97316">—</div>
-            <div class="mc-macro-unit">g</div>
-            <div class="mc-macro-name">Protéines</div>
-          </div>
-          <div class="mc-macro-pill">
-            <div class="mc-macro-val" id="mcCarbs" style="color:#3b82f6">—</div>
-            <div class="mc-macro-unit">g</div>
-            <div class="mc-macro-name">Glucides</div>
-          </div>
-          <div class="mc-macro-pill">
-            <div class="mc-macro-val" id="mcFat" style="color:#a855f7">—</div>
-            <div class="mc-macro-unit">g</div>
-            <div class="mc-macro-name">Lipides</div>
-          </div>
-        </div>
-        <div class="mc-warn" id="mcWarn"></div>
-      </div>
-
-    </div>
-    <div class="macro-modal-footer">
-      <button class="mc-calc-btn" onclick="calculateMacros()">Calculer mes macros</button>
-    </div>
-  </div>
-</div>
 
 <!-- CGU CONSENT BANNER -->
 <div id="cguBanner" class="cgu-banner">
@@ -4451,11 +4462,13 @@ function switchTab(tab) {
   document.getElementById('tabCali').classList.toggle('active', tab === 'cali');
   document.getElementById('tabConseils').classList.toggle('active', tab === 'conseils');
   document.getElementById('tabComplements').classList.toggle('active', tab === 'complements');
+  document.getElementById('tabMacros').classList.toggle('active', tab === 'macros');
 
   const isSport = tab === 'maison' || tab === 'salle' || tab === 'cali';
   document.getElementById('tabContentSport').style.display = isSport ? '' : 'none';
   document.getElementById('tabContentConseils').style.display = tab === 'conseils' ? '' : 'none';
   document.getElementById('tabContentComplements').style.display = tab === 'complements' ? '' : 'none';
+  document.getElementById('tabContentMacros').style.display = tab === 'macros' ? '' : 'none';
 
   const heroMap = {
     maison:      { eyebrow: 'Débutant · Maison · Sans matériel',                   span: 'Prise de Masse',        sub: 'Tapis de sol uniquement &nbsp;·&nbsp; 6 séances / 7 jours',  seances: '6', exos: '35', min: '45' },
@@ -4463,6 +4476,7 @@ function switchTab(tab) {
     cali:        { eyebrow: 'Intermédiaire · Street park · Barres & Parallettes',  span: 'Calisthénie & Street',  sub: 'Parc ou barre de traction &nbsp;·&nbsp; 4 séances / 7 jours',  seances: '4', exos: '20', min: '50' },
     conseils:    { eyebrow: 'Nutrition · Récupération · Mental · Hygiène',         span: 'Conseils & Guides',     sub: 'Tout ce qu\'il faut savoir pour progresser durablement',        seances: '6', exos: '8',  min: '∞'  },
     complements: { eyebrow: 'Science · Dosages · Tier list · Stack recommandé',    span: 'Compléments',           sub: 'Ce qui marche vraiment — classé par niveau de preuve',          seances: '—', exos: '—',  min: '—'  },
+    macros:      { eyebrow: 'Harris-Benedict · TDEE · Macros personnalisés',       span: 'Calculateur de Macros', sub: 'Calories et macros personnalisés selon ton objectif',            seances: '—', exos: '—',  min: '—'  },
   };
 
   const hero = heroMap[tab];
@@ -4480,7 +4494,7 @@ function switchTab(tab) {
   }, 220);
 
   const heroStats = document.getElementById('heroStats');
-  heroStats.style.display = (tab === 'conseils' || tab === 'complements') ? 'none' : '';
+  heroStats.style.display = (tab === 'conseils' || tab === 'complements' || tab === 'macros') ? 'none' : '';
 
   if (isSport) {
     renderNav();
